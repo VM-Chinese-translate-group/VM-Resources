@@ -1,0 +1,15 @@
+{
+  "metaVersion": "v2",
+  "modpacks": {
+    "example": {
+      "name": "example",
+      "translationVersion": "1.1.0",
+      "modpackVersion": "1.0"
+    },
+    "example2": {
+      "name": "example2",
+      "translationVersion": "1.4.0",
+      "modpackVersion": "1.2"
+    }
+  }
+}
