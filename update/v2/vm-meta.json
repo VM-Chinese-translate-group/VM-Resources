@@ -8,6 +8,42 @@
     "example2": {
       "translationVersion": "1.4.0",
       "modpackVersion": "1.2.1"
+    },
+    "liminal-industries": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "1.17"
+    },
+    "ftbe": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "1.21.4"
+    },
+    "craftoria": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "1.23.0"
+    },
+    "techopolis3": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "7.1"
+    },
+    "skies-2": {
+      "translationVersion": "1.1.0",
+      "modpackVersion": "1.6.1"
+    },
+    "cosmic-frontiers": {
+      "translationVersion": "1.1.0",
+      "modpackVersion": "0.7.2"
+    },
+    "prominence2": {
+      "translationVersion": "1.1.0",
+      "modpackVersion": "3.1.53hf2"
+    },
+    "mce2": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "1.1.1.0"
+    },
+    "imc": {
+      "translationVersion": "1.5.9",
+      "modpackVersion": "1.5.9"
     }
   }
 }
