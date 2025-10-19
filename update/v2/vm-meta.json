@@ -48,6 +48,14 @@
     "imc": {
       "translationVersion": "1.0.0",
       "modpackVersion": "1.5.9"
+    },
+    "sb3": {
+      "translationVersion": "1.11.5",
+      "modpackVersion": "1.11.6"
+    },
+    "sb4": {
+      "translationVersion": "1.0.0",
+      "modpackVersion": "1.0.0"
     }
   }
 }
