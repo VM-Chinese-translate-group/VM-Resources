@@ -19,18 +19,18 @@
     },
     "ftbe": {
       "translationVersion": "1.0.0",
-      "modpackVersion": "1.21.4"
+      "modpackVersion": "1.24.2"
     },
     "craftoria": {
       "translationVersion": "1.0.0",
-      "modpackVersion": "1.23.0"
+      "modpackVersion": "1.24.0"
     },
     "techopolis3": {
       "translationVersion": "1.0.0",
       "modpackVersion": "7.1"
     },
     "skies-2": {
-      "translationVersion": "1.1.0",
+      "translationVersion": "1.10.0",
       "modpackVersion": "1.10.0"
     },
     "cosmic-frontiers": {
@@ -39,11 +39,11 @@
     },
     "prominence2": {
       "translationVersion": "1.1.0",
-      "modpackVersion": "3.9.5"
+      "modpackVersion": "3.9.6"
     },
     "mce2": {
       "translationVersion": "1.0.0",
-      "modpackVersion": "1.1.1.0"
+      "modpackVersion": "1.2.0"
     },
     "imc": {
       "translationVersion": "1.0.0",
