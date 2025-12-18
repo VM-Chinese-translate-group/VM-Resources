@@ -49,6 +49,10 @@
       "translationVersion": "1.0.0",
       "modpackVersion": "1.5.10"
     },
+    "ob2": {
+      "translationVersion": "1.14.1",
+      "modpackVersion": "1.14.1"
+    },
     "sb3": {
       "translationVersion": "1.11.5",
       "modpackVersion": "1.11.6"
