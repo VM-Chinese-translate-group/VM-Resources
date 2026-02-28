@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # 仅在推送到 main 分支时触发
-      - dispatch  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -32,3 +32,17 @@ jobs:
           remote_host: ${{ secrets.SERVER_IP }}
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Setup Aliyun CLI
+        uses: aliyun/aliyun-cli-action@v1
+        with:
+          mode: AK
+          access-key-id: ${{ secrets.ALIYUN_AK_ID }}
+          access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
+
+      - name: Refresh CDN Cache
+        run: |
+          aliyun cdn RefreshObjectCaches \
+            --region cn-hangzhou \
+            --ObjectPath "http://cdn.maxing.site/" \
+            --ObjectType Directory
