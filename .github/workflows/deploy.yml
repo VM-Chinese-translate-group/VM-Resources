@@ -3,50 +3,94 @@ name: Deploy CDN Files
 on:
   push:
     branches:
-      - main  # 仅在推送到 main 分支时触发
+      - main
   workflow_dispatch:
+    inputs:
+      manual_files:
+        description: '手动指定要刷新的文件路径 (空格分隔，例如: images/logo.png)'
+        required: false
+        type: string
+      refresh_all:
+        description: '是否全量刷新整个目录？(勾选后忽略上方指定的文件)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出仓库代码
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 2. 使用 rsync 同步文件到服务器
+      # 1. 提取变更文件 (仅在 Push 时运行，并在源头排除无关目录)
+      - name: Get changed files
+        if: github.event_name == 'push'
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files_ignore: |
+            .github/**
+
+      # 2. Rsync 同步 (排除手动触发；排除纯粹的无关文件修改)
       - name: Deploy to Server via Rsync
+        if: github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true'
         uses: Burnett01/rsync-deployments@7.0.0
         with:
-          # -a: 归档模式; -v: 详细输出; -z: 传输时压缩; -r: 递归
-          # --delete: 删除服务器上仓库中不存在的文件，保持完全一致
-          # --chmod: 强制设置目标目录为 755，文件为 644，确保 Nginx 有权读取
-          # -e ...: 禁用 SSH 严格主机检查，避免卡在 "yes/no" 确认环节
           switches: -avzr --delete --chmod=D755,F644 --exclude='.github/' --exclude='.git/' -e 'ssh -o StrictHostKeyChecking=no'
-          
           path: ./
-          
           remote_path: /var/www/cdn.maxing.site/public/
-          
           remote_host: ${{ secrets.SERVER_IP }}
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.SERVER_SSH_KEY }}
 
+      # 3. 安装 Aliyun CLI (仅在需要刷新 CDN 时安装)
       - name: Setup Aliyun CLI
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
         uses: aliyun/aliyun-cli-action@v1
         with:
           mode: AK
-          access-key-id: ${{ secrets.ALIYUN_AK_ID }}
-          access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
+          access-key-id: "placeholder"
+          access-key-secret: "placeholder"
 
+      # 4. 刷新 CDN (仅在需要刷新时运行)
       - name: Refresh CDN Cache
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
         env:
-          # 关键：Aliyun CLI 会优先读取这两个标准环境变量
           ALIBABA_CLOUD_ACCESS_KEY_ID: ${{ secrets.ALIYUN_AK_ID }}
           ALIBABA_CLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_AK_SECRET }}
         run: |
-          aliyun cdn RefreshObjectCaches \
-            --region cn-hangzhou \
-            --ObjectPath "http://cdn.maxing.site/" \
-            --ObjectType Directory
+          # 场景 A: 手动触发 -> 全量刷新
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.refresh_all }}" == "true" ]]; then
+            echo "执行全量目录刷新..."
+            aliyun cdn RefreshObjectCaches --region cn-hangzhou --ObjectPath "http://cdn.maxing.site/" --ObjectType Directory
+            exit 0
+          fi
+
+          > urls_to_refresh.txt
+
+          # 场景 B: 手动触发 -> 刷新指定文件
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.manual_files }}" ]]; then
+            for file in ${{ inputs.manual_files }}; do
+              echo "http://cdn.maxing.site/$file" >> urls_to_refresh.txt
+            done
+          # 场景 C: 代码 Push -> 刷新变更文件
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            # 此处无需再用 bash 判断目录，因为 changed-files 已经通过 files_ignore 过滤了
+            for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              echo "http://cdn.maxing.site/$file" >> urls_to_refresh.txt
+            done
+          fi
+
+          # 执行文件级刷新
+          if [ -s urls_to_refresh.txt ]; then
+            echo "即将刷新的 URL 列表:"
+            cat urls_to_refresh.txt
+            URL_PATHS=$(cat urls_to_refresh.txt)
+            aliyun cdn RefreshObjectCaches --region cn-hangzhou --ObjectPath "$URL_PATHS" --ObjectType File
+          else
+            echo "没有需要刷新的有效文件。"
+          fi
