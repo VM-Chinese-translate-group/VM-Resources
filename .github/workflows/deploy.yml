@@ -41,6 +41,10 @@ jobs:
           access-key-secret: ${{ secrets.ALIYUN_AK_SECRET }}
 
       - name: Refresh CDN Cache
+        env:
+          # 关键：Aliyun CLI 会优先读取这两个标准环境变量
+          ALIBABA_CLOUD_ACCESS_KEY_ID: ${{ secrets.ALIYUN_AK_ID }}
+          ALIBABA_CLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_AK_SECRET }}
         run: |
           aliyun cdn RefreshObjectCaches \
             --region cn-hangzhou \
