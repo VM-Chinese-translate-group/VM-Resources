@@ -1,0 +1,34 @@
+name: Deploy CDN Files
+
+on:
+  push:
+    branches:
+      - main  # 仅在推送到 main 分支时触发
+      - dispatch  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出仓库代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 使用 rsync 同步文件到服务器
+      - name: Deploy to Server via Rsync
+        uses: Burnett01/rsync-deployments@7.0.0
+        with:
+          # -a: 归档模式; -v: 详细输出; -z: 传输时压缩; -r: 递归
+          # --delete: 删除服务器上仓库中不存在的文件，保持完全一致
+          # --chmod: 强制设置目标目录为 755，文件为 644，确保 Nginx 有权读取
+          # -e ...: 禁用 SSH 严格主机检查，避免卡在 "yes/no" 确认环节
+          switches: -avzr --delete --chmod=D755,F644 --exclude='.github/' --exclude='.git/' -e 'ssh -o StrictHostKeyChecking=no'
+          
+          path: ./
+          
+          remote_path: /var/www/cdn.maxing.site/public/
+          
+          remote_host: ${{ secrets.SERVER_IP }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SERVER_SSH_KEY }}
