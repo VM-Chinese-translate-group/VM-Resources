@@ -26,7 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 1. 提取变更文件 (仅在 Push 时运行，并在源头排除无关目录)
       - name: Get changed files
         if: github.event_name == 'push'
         id: changed-files
@@ -35,10 +34,9 @@ jobs:
           files_ignore: |
             .github/**
 
-      # 2. Rsync 同步 (排除手动触发；排除纯粹的无关文件修改)
       - name: Deploy to Server via Rsync
         if: github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true'
-        uses: Burnett01/rsync-deployments@8
+        uses: Burnett01/rsync-deployments@8.0.2
         with:
           switches: -avzr --delete --chmod=D755,F644 --exclude='.github/' --exclude='.git/' -e 'ssh -o StrictHostKeyChecking=no'
           path: ./
@@ -47,7 +45,6 @@ jobs:
           remote_user: ${{ secrets.SERVER_USER }}
           remote_key: ${{ secrets.SERVER_SSH_KEY }}
 
-      # 3. 安装 Aliyun CLI (仅在需要刷新 CDN 时安装)
       - name: Setup Aliyun CLI
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
         uses: aliyun/aliyun-cli-action@v1
@@ -56,7 +53,6 @@ jobs:
           access-key-id: "placeholder"
           access-key-secret: "placeholder"
 
-      # 4. 刷新 CDN (仅在需要刷新时运行)
       - name: Refresh CDN Cache
         if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
         env:
