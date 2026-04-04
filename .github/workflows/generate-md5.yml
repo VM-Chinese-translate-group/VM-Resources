@@ -1,0 +1,32 @@
+name: Generate MD5
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gen-md5:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3"
+
+      - name: Generate MD5 files
+        run: python .github/scripts/gen_md5.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "chore: update md5 files"
+          title: "chore: update md5 files"
+          branch: auto/md5-update
+          delete-branch: true
