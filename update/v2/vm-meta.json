@@ -58,12 +58,16 @@
       "modpackVersion": "1.11.6"
     },
     "sb4": {
-      "translationVersion": "1.9.4",
+      "translationVersion": "1.9.6",
       "modpackVersion": "1.9.6"
     },
     "neotech": {
       "translationVersion": "1.11.0",
       "modpackVersion": "1.11.2"
+    },
+    "cte2": {
+      "translationVersion": "1.1.3",
+      "modpackVersion": "1.1.3"
     }
   }
 }
