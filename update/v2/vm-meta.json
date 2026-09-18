@@ -18,12 +18,12 @@
       "modpackVersion": "1.14"
     },
     "ftbe": {
-      "translationVersion": "1.40.1",
-      "modpackVersion": "1.40.1"
+      "translationVersion": "1.43.1",
+      "modpackVersion": "1.43.1"
     },
     "craftoria": {
-      "translationVersion": "1.0.0",
-      "modpackVersion": "1.31.0"
+      "translationVersion": "1.34.0",
+      "modpackVersion": "1.34.0"
     },
     "techopolis3": {
       "translationVersion": "12.3",
@@ -100,6 +100,14 @@
     "submerged-2": {
       "translationVersion": "8.1",
       "modpackVersion": "8.1"
+    },
+    "opolis-contained": {
+      "translationVersion": "6.2",
+      "modpackVersion": "6.2"
+    },
+    "architects-exodus": {
+      "translationVersion": "1.12.0",
+      "modpackVersion": "1.12.0"
     }
   }
 }
