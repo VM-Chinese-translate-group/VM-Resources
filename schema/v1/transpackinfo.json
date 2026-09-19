@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TransPack Info",
+  "description": "transpackinfo.json 信息文件",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "formatVersion",
+    "name",
+    "modpackVersionRange"
+  ],
+  "properties": {
+    "formatVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "modpackVersionRange": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "delete": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relativePath"
+          },
+          "uniqueItems": true
+        },
+        "rename": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "from": {
+                "$ref": "#/$defs/relativePath"
+              },
+              "to": {
+                "$ref": "#/$defs/relativePath"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?![A-Za-z]:/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)[^\\\\]+$"
+    }
+  }
+}
