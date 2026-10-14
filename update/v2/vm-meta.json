@@ -18,8 +18,8 @@
       "modpackVersion": "1.14"
     },
     "ftbe": {
-      "translationVersion": "1.43.1",
-      "modpackVersion": "1.43.1"
+      "translationVersion": "1.45.1",
+      "modpackVersion": "1.45.1"
     },
     "craftoria": {
       "translationVersion": "1.34.0",
@@ -108,6 +108,10 @@
     "architects-exodus": {
       "translationVersion": "1.14.0",
       "modpackVersion": "1.14.0"
+    },
+    "matrix": {
+      "translationVersion": "1.0.6",
+      "modpackVersion": "1.0.6"
     }
   }
 }
