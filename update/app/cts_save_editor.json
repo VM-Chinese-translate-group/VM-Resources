@@ -1,9 +1,9 @@
 {
-  "version": "2.0.0",
-  "title": "CTS Save Editor 2.0 完全重写！",
+  "version": "2.1.0",
+  "title": "2.1 必须更新！【未来】新版会丢数据！",
   "download_url": "https://github.com/Wulian233/CTS-Save-Editor/releases/latest",
   "changelog": {
-    "zh-CN": "完全重写！UI页面美化重做！更多实用功能！",
-    "en-US": "Completely rewritten! UI redesigned! More practical features!"
+    "zh-CN": "支持修改最新版本存档！更新各类数据和依赖",
+    "en-US": "Supports modifying the latest version save! Updates all kinds of data and dependencies"
   }
 }
