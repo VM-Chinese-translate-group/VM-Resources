@@ -2,91 +2,53 @@ name: Deploy CDN Files
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy.yml'
+      - 'README.md'
+      - 'name.json'
+      - 'tips.txt'
+      - 'resourcepack/**'
+      - 'update/**'
   workflow_dispatch:
-    inputs:
-      manual_files:
-        description: '手动指定要刷新的文件路径 (空格分隔，例如: images/logo.png)'
-        required: false
-        type: string
-      refresh_all:
-        description: '是否全量刷新整个目录？(勾选后忽略上方指定的文件)'
-        required: false
-        type: boolean
-        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vm-resources-oss-deployment
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          ref: main
+          persist-credentials: false
 
-      - name: Get changed files
-        if: github.event_name == 'push'
-        id: changed-files
-        uses: tj-actions/changed-files@v47
+      - uses: aliyun/setup-aliyun-cli-action@v1
         with:
-          files_ignore: |
-            .github/**
+          version: '3.5.1'
 
-      - name: Deploy to Server via Rsync
-        if: github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true'
-        uses: Burnett01/rsync-deployments@v9
-        with:
-          switches: -avzr --delete --chmod=D755,F644 --exclude='.github/' --exclude='.git/' -e 'ssh -o StrictHostKeyChecking=no'
-          path: ./
-          remote_path: /var/www/cdn.maxing.site/public/
-          remote_host: ${{ secrets.SERVER_IP }}
-          remote_user: ${{ secrets.SERVER_USER }}
-          remote_key: ${{ secrets.SERVER_SSH_KEY }}
-
-      - name: Setup Aliyun CLI
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
-        uses: aliyun/aliyun-cli-action@v1
-        with:
-          mode: AK
-          access-key-id: "placeholder"
-          access-key-secret: "placeholder"
-
-      - name: Refresh CDN Cache
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && steps.changed-files.outputs.any_changed == 'true')
+      - name: Upload public files to OSS
         env:
           ALIBABA_CLOUD_ACCESS_KEY_ID: ${{ secrets.ALIYUN_AK_ID }}
           ALIBABA_CLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_AK_SECRET }}
         run: |
-          # 场景 A: 手动触发 -> 全量刷新
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.refresh_all }}" == "true" ]]; then
-            echo "执行全量目录刷新..."
-            aliyun cdn RefreshObjectCaches --region cn-hangzhou --ObjectPath "http://cdn.maxing.site/" --ObjectType Directory
-            exit 0
-          fi
+          : "${ALIBABA_CLOUD_ACCESS_KEY_ID:?Missing ALIYUN_AK_ID}"
+          : "${ALIBABA_CLOUD_ACCESS_KEY_SECRET:?Missing ALIYUN_AK_SECRET}"
+          stage=$(mktemp -d)
+          git archive HEAD -- README.md name.json tips.txt resourcepack update | tar -xf - -C "$stage"
+          aliyun oss cp "$stage/" oss://vmct-resources/vm-resources/ --recursive \
+            --region cn-beijing --sign-version v4 --disable-dir-object --disable-ignore-error \
+            --meta 'Content-Disposition:attachment' --force
 
-          > urls_to_refresh.txt
-
-          # 场景 B: 手动触发 -> 刷新指定文件
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.manual_files }}" ]]; then
-            for file in ${{ inputs.manual_files }}; do
-              echo "http://cdn.maxing.site/$file" >> urls_to_refresh.txt
-            done
-          # 场景 C: 代码 Push -> 刷新变更文件
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            # 此处无需再用 bash 判断目录，因为 changed-files 已经通过 files_ignore 过滤了
-            for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-              echo "http://cdn.maxing.site/$file" >> urls_to_refresh.txt
-            done
-          fi
-
-          # 执行文件级刷新
-          if [ -s urls_to_refresh.txt ]; then
-            echo "即将刷新的 URL 列表:"
-            cat urls_to_refresh.txt
-            URL_PATHS=$(cat urls_to_refresh.txt)
-            aliyun cdn RefreshObjectCaches --region cn-hangzhou --ObjectPath "$URL_PATHS" --ObjectType File
-          else
-            echo "没有需要刷新的有效文件。"
-          fi
+      - name: Purge ESA cache for VM-Resources
+        env:
+          ALIBABA_CLOUD_ACCESS_KEY_ID: ${{ secrets.ALIYUN_AK_ID }}
+          ALIBABA_CLOUD_ACCESS_KEY_SECRET: ${{ secrets.ALIYUN_AK_SECRET }}
+        run: |
+          aliyun esa PurgeCaches --region cn-hangzhou --SiteId 173850988714216 \
+            --Type directory --Content '{"Directories":["https://files.vmct.top/vm-resources/"]}' --Force true
