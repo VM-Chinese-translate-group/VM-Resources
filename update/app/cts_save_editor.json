@@ -1,9 +1,9 @@
 {
-  "version": "2.1.0",
-  "title": "2.1 必须更新！【未来】新版会丢数据！",
+  "version": "2.1.1",
+  "title": "2.1.1 进一步优化",
   "download_url": "https://github.com/Wulian233/CTS-Save-Editor/releases/latest",
   "changelog": {
-    "zh-CN": "支持修改最新版本存档！更新各类数据和依赖",
-    "en-US": "Supports modifying the latest version save! Updates all kinds of data and dependencies"
+    "zh-CN": "更新内置的更新检测链接。鼠标悬停在左侧分类栏不再显示Tooltip",
+    "en-US": "Updated the built-in update check link. Tooltip no longer appears when hovering over the left category bar"
   }
 }
